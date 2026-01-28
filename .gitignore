@@ -4,3 +4,4 @@ __pycache__/
 .env
 .vscode/
 config.py
+ordem_servico_final.sql
