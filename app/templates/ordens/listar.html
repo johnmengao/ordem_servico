@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block conteudo %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>📂 Ordens de Serviço</h2>
+    <a href="/ordens/nova" class="btn btn-success">➕ Nova Ordem</a>
+  </div>
+
+  <!-- Filtros -->
+  <form method="GET" class="row g-3 mb-4">
+    <div class="col-md-2">
+      <label class="form-label">Status</label>
+      <select name="status" class="form-select">
+        <option value="">Todos</option>
+        <option value="aberta" {% if request.args.get('status') == 'aberta' %}selected{% endif %}>Aberta</option>
+        <option value="em_andamento" {% if request.args.get('status') == 'em_andamento' %}selected{% endif %}>Em andamento</option>
+        <option value="aguardando_pecas" {% if request.args.get('status') == 'aguardando_pecas' %}selected{% endif %}>Aguardando peças</option>
+        <option value="aguardando_aprovacao" {% if request.args.get('status') == 'aguardando_aprovacao' %}selected{% endif %}>Aguardando aprovação</option>
+        <option value="concluida" {% if request.args.get('status') == 'concluida' %}selected{% endif %}>Concluída</option>
+        <option value="cancelada" {% if request.args.get('status') == 'cancelada' %}selected{% endif %}>Cancelada</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Prioridade</label>
+      <select name="prioridade" class="form-select">
+        <option value="">Todas</option>
+        <option value="baixa" {% if request.args.get('prioridade') == 'baixa' %}selected{% endif %}>Baixa</option>
+        <option value="media" {% if request.args.get('prioridade') == 'media' %}selected{% endif %}>Média</option>
+        <option value="alta" {% if request.args.get('prioridade') == 'alta' %}selected{% endif %}>Alta</option>
+        <option value="urgente" {% if request.args.get('prioridade') == 'urgente' %}selected{% endif %}>Urgente</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Cliente</label>
+      <input type="text" name="cliente" class="form-control" placeholder="Nome do cliente" value="{{ request.args.get('cliente', '') }}">
+    </div>
+    <div class="col-12 text-end">
+      <button type="submit" class="btn btn-primary">Filtrar</button>
+    </div>
+  </form>
+
+  <!-- Tabela -->
+  <table class="table table-striped table-hover table-responsive">
+    <thead class="table-dark">
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Cliente</th>
+        <th scope="col">Título</th>
+        <th scope="col">Status</th>
+        <th scope="col">Prioridade</th>
+        <th scope="col">Data Abertura</th>
+        <th scope="col">Pagamento</th>
+        <th scope="col">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ordem in ordens %}
+      <tr>
+        <td>{{ ordem.id }}</td>
+        <td>{{ ordem.cliente_nome }}</td>
+        <td>{{ ordem.titulo }}</td>
+        <td>{{ ordem.status }}</td>
+        <td>{{ ordem.prioridade }}</td>
+        <td>{{ ordem.data_abertura.strftime('%d/%m/%Y') }}</td>
+        <td>{{ ordem.metodo_pagamento_descricao or 'Não informado' }}</td>
+        <td>
+          <div class="btn-group btn-group-sm flex-wrap" role="group">
+            <!--<a href="/ordens/ver/{{ ordem.id }}" class="btn btn-outline-info" title="Ver detalhes">👁️</a>-->
+            <a href="/ordens/relatorio_pdf/{{ ordem.id }}" class="btn btn-outline-primary" title="Imprimir PDF">🖨️</a>
+            <a href="/ordens/editar/{{ ordem.id }}" class="btn btn-outline-warning" title="Editar">✏️</a>
+            
+            <!-- Botão Finalizar com ícone -->
+            <button type="button" class="btn btn-outline-success" title="Finalizar" data-bs-toggle="modal" data-bs-target="#modalFinalizar{{ ordem.id }}">
+              ✅
+            </button>
+            
+            <form action="/ordens/excluir/{{ ordem.id }}" method="post" onsubmit="return confirm('Tem certeza que deseja excluir esta ordem de serviço?')">
+              <button type="submit" class="btn btn-outline-danger " title="Excluir">🗑️</button>
+            </form>
+          </div>
+        </td>
+
+        <!-- Modal de finalização -->
+        <div class="modal fade" id="modalFinalizar{{ ordem.id }}" tabindex="-1" aria-labelledby="modalLabel{{ ordem.id }}" aria-hidden="true">
+          <div class="modal-dialog">
+            <form action="/ordens/finalizar/{{ ordem.id }}" method="POST">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="modalLabel{{ ordem.id }}">Finalizar Ordem #{{ ordem.id }}</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                  <label for="metodo_pagamento_id">Método de Pagamento:</label>
+                  <select name="metodo_pagamento_id" class="form-select" required>
+                    <option value="">Selecione</option>
+                    <option value="1">Dinheiro</option>
+                    <option value="2">Cartão de Crédito</option>
+                    <option value="3">Cartão de Débito</option>
+                    <option value="4">Pix</option>
+                    <option value="5">Transferência</option>
+                    <option value="6">Boletos</option>
+                  </select>
+                </div>
+                <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary">Confirmar</button>
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Paginação -->
+  <nav aria-label="Navegação de páginas">
+    <ul class="pagination justify-content-center">
+      {% for p in range(1, total_paginas + 1) %}
+        <li class="page-item {% if p == pagina %}active{% endif %}">
+          <a class="page-link"
+             href="?pagina={{ p }}{% if request.args.get('status') %}&status={{ request.args.get('status') }}{% endif %}
+             {% if request.args.get('prioridade') %}&prioridade={{ request.args.get('prioridade') }}{% endif %}
+             {% if request.args.get('cliente') %}&cliente={{ request.args.get('cliente') }}{% endif %}">
+            {{ p }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </nav>
+
+</div>
+{% endblock %}

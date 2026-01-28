@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-container {
+      background-color: #fff;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-container img {
+      height: 60px;
+      display: block;
+      margin: 0 auto 20px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #0d6efd;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0b5ed7;
+    }
+
+    .erro {
+      color: red;
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    .link-recuperar {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .link-recuperar a {
+      color: #0d6efd;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .link-recuperar a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <img src="{{ url_for('static', filename='img/logo_empresa.png') }}" alt="Logo da empresa">
+    <h2>🔐 Login</h2>
+    {% if erro %}
+      <div class="erro">{{ erro }}</div>
+    {% endif %}
+    <form method="POST">
+      <label for="email">Email:</label>
+      <input type="email" name="email" id="email" required>
+
+      <label for="senha">Senha:</label>
+      <input type="password" name="senha" id="senha" required>
+
+      <button type="submit">Entrar</button>
+    </form>
+
+    <div class="link-recuperar">
+        <a href="{{ url_for('auth.recuperar_senha') }}">Esqueci minha senha</a>
+    </div>
+
+  </div>
+
+  <script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value.trim();
+
+      if (!email || !senha) {
+        alert('Por favor, preencha todos os campos.');
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
+</html>

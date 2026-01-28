@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block conteudo %}
+<div class="container mt-4">
+  <div class="card shadow">
+    <div class="card-header bg-dark text-white">
+      <h4 class="mb-0">{% if ordem %}Editar{% else %}Nova{% endif %} Ordem de Serviço</h4>
+    </div>
+    <div class="card-body">
+      <form action="/ordens/nova" method="post">
+        <div class="mb-3">
+          <label for="cliente_id" class="form-label">Cliente</label>
+          <select name="cliente_id" class="form-select" required>
+            {% for cliente in clientes %}
+              <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="titulo" class="form-label">Título</label>
+          <input type="text" name="titulo" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="descricao_entrada" class="form-label">Descrição do problema</label>
+          <textarea name="descricao_entrada" class="form-control" rows="3" required></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="prioridade" class="form-label">Prioridade</label>
+          <select name="prioridade" class="form-select">
+            <option value="baixa">Baixa</option>
+            <option value="media" selected>Média</option>
+            <option value="alta">Alta</option>
+            <option value="urgente">Urgente</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="status" class="form-label">Status</label>
+          <select name="status" class="form-select">
+            <option value="aberta" selected>Aberta</option>
+            <option value="em_andamento">Em andamento</option>
+            <option value="aguardando_pecas">Aguardando Pecas</option>
+            <option value="aguardando_aprovacao">Aguardando Aprovacao</option>
+            <option value="concluida">Concluida</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+        </div>
+        <!--<div class="mb-3">
+          <label for="metodo_pagamento_id" class="form-label">Método de Pagamento</label>
+          <select name="metodo_pagamento_id" class="form-select">
+            {% for metodo in metodos %}
+              <option value="{{ metodo.id }}">{{ metodo.descricao }}</option>
+            {% endfor %}
+          </select>
+        </div>-->
+        <div class="mb-3">
+          <label for="observacoes" class="form-label">Observações</label>
+          <textarea name="observacoes" class="form-control" rows="2"></textarea>
+        </div>
+        <div class="text-end">
+          <button type="submit" class="btn btn-primary">💾 Abrir Ordem</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

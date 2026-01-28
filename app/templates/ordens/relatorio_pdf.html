@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Relatório da Ordem #{{ ordem.ordem_id }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+    }
+    header img {
+      height: 60px;
+    }
+    header h1 {
+      font-size: 20px;
+      margin: 0;
+      flex-grow: 1;
+      text-align: center;
+    }
+    h2 {
+      font-size: 14px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+    h3 {
+      font-size: 16px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      font-size: 14px;
+      border: 1px solid #ccc;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      font-size: 14px;
+    }
+    ul li {
+      margin-bottom: 5px;
+    }
+    p {
+      font-size: 14px;
+    }
+    hr {
+      margin: 20px 0;
+    }
+    table.signature td {
+      padding-top: 20px;
+      font-size: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="file://{{ logo_path }}" alt="Logo da empresa">
+    <h1>Relatório da Ordem de Serviço nº {{ ordem.ordem_id }}</h1>
+  </header>
+
+  <table>
+    <tr><th>Título</th><td>{{ ordem.titulo }}</td></tr>
+    <tr><th>Status</th><td>{{ ordem.status | upper }}</td></tr>
+    <tr><th>Data de abertura</th><td>{{ ordem.data_abertura.strftime('%d/%m/%Y') }}</td></tr>
+    <tr>
+      <th>Data de fechamento</th>
+      <td>
+        {% if ordem.data_fechamento %}
+          {{ ordem.data_fechamento.strftime('%d/%m/%Y') }}
+        {% else %}
+          Em aberto
+        {% endif %}
+      </td>
+    </tr>
+    <tr><th>Cliente</th><td>{{ ordem.nome_cliente }}</td></tr>
+    <tr><th>Responsável técnico</th><td>{{ ordem.nome_usuario }}</td></tr>
+  </table>
+
+  <hr>
+
+  <h3>Descrição da saída</h3>
+  <p>{{ ordem.descricao_saida or 'Sem descrição registrada.' }}</p>
+
+  <hr>
+
+  <h3>Serviços</h3>
+  {% if servicos %}
+  <table>
+    <thead>
+      <tr>
+        <th>Serviço</th>
+        <th>Qtd</th>
+        <th>Preço Unitário</th>
+        <th>Desconto</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in servicos %}
+      <tr>
+        <td>{{ s.servico_nome }}</td>
+        <td>{{ s.quantidade }}</td>
+        <td>R$ {{ '%.2f'|format(s.preco_unitario) }}</td>
+        <td>{{ '%.2f'|format(s.desconto) }}%</td>
+        <td>R$ {{ '%.2f'|format(s.quantidade * s.preco_unitario * (1 - s.desconto / 100)) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p><em>Nenhum serviço registrado.</em></p>
+  {% endif %}
+
+  <hr>
+
+  <h3>Peças</h3>
+  {% if pecas %}
+  <table>
+    <thead>
+      <tr>
+        <th>Peça</th>
+        <th>Qtd</th>
+        <th>Preço Unitário</th>
+        <th>Desconto</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in pecas %}
+      <tr>
+        <td>{{ p.nome }}</td>
+        <td>{{ p.quantidade }}</td>
+        <td>R$ {{ '%.2f'|format(p.preco_unitario) }}</td>
+        <td>{{ '%.2f'|format(p.desconto) }}%</td>
+        <td>R$ {{ '%.2f'|format(p.quantidade * p.preco_unitario * (1 - p.desconto / 100)) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p><em>Nenhuma peça registrada.</em></p>
+  {% endif %}
+
+  <hr>
+
+  <h3>Totais</h3>
+  <ul>
+    <li><strong>Serviços:</strong> R$ {{ '%.2f'|format(ordem.total_servicos) }}</li>
+    <li><strong>Peças:</strong> R$ {{ '%.2f'|format(ordem.total_pecas) }}</li>
+    <li><strong>Total geral:</strong> <strong>R$ {{ '%.2f'|format(ordem.total_geral) }}</strong></li>
+  </ul>
+
+  <hr>
+
+  <table class="signature" style="width:100%;">
+    <tr>
+      <td>
+        _______________________________________<br>
+        <strong>Assinatura do Técnico</strong><br>
+        {{ ordem.nome_usuario }}
+      </td>
+      <td>
+        _______________________________________<br>
+        <strong>Assinatura do Cliente</strong><br>
+        {{ ordem.nome_cliente }}
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

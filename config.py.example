@@ -1,0 +1,15 @@
+DB_CONFIG = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'sua_senha_do_banco',
+    'database': 'ordem_servico'
+}
+
+MAIL_CONFIG = {
+    'MAIL_SERVER': 'smtp.gmail.com',
+    'MAIL_PORT': 587,
+    'MAIL_USE_TLS': True,
+    'MAIL_USERNAME': 'e_mail@gmail.com',
+    'MAIL_PASSWORD': 'sfsf sfsf sfsf sfsf'
+}
+

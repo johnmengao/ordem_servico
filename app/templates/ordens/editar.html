@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<div class="container mt-4">
+    <!-- Card de Edição da Ordem -->
+    <div class="card shadow">
+        <div class="card-header bg-dark text-white">
+            <h4 class="mb-0">Editar Ordem #{{ ordem.id }}</h4>
+        </div>
+        <div class="card-body">
+            <form action="/ordens/editar/{{ ordem.id }}" method="post">
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="aberta" {% if ordem.status=='aberta' %}selected{% endif %}>Aberta</option>
+                        <option value="em_andamento" {% if ordem.status=='em_andamento' %}selected{% endif %}>Em andamento</option>
+                        <option value="aguardando_pecas" {% if ordem.status=='aguardando_pecas' %}selected{% endif %}>Aguardando peças</option>
+                        <option value="aguardando_aprovacao" {% if ordem.status=='aguardando_aprovacao' %}selected{% endif %}>Aguardando aprovação</option>
+                        <option value="concluida" {% if ordem.status=='concluida' %}selected{% endif %}>Concluída</option>
+                        <option value="cancelada" {% if ordem.status=='cancelada' %}selected{% endif %}>Cancelada</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="descricao_saida" class="form-label">Descrição de saída</label>
+                    <textarea name="descricao_saida" class="form-control" rows="3">{{ ordem.descricao_saida or '' }}</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="observacoes" class="form-label">Observações</label>
+                    <textarea name="observacoes" class="form-control" rows="2">{{ ordem.observacoes or '' }}</textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">💾 Salvar Alterações</button>
+                <a href="/ordens/ver/{{ ordem.id }}" class="btn btn-secondary">↩️ Visualizar Ordem</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- Card de Serviços -->
+    <div class="card shadow mt-4">
+        <div class="card-header bg-dark text-white">
+            <h4 class="mb-0">Adicionar Serviço</h4>
+        </div>
+        <div class="card-body">
+            <a href="/ordens/adicionar_servico/{{ ordem.id }}" class="btn btn-outline-success btn-sm mb-2">➕ Adicionar Serviço</a>
+            
+            <table class="table table-bordered table-sm">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>Nome</th>
+                        <th>Qtd</th>
+                        <th>Preço Unitário</th>
+                        <th>Desconto</th>
+                        <th>Total</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in servicos %}
+                    <tr>
+                        <td>{{ s.nome_servico }}</td>
+                        <td>{{ s.quantidade }}</td>
+                        <td>R$ {{ "%.2f"|format(s.preco_unitario) }}</td>
+                        <td>{{ "%.2f"|format(s.desconto) }}%</td>
+                        <td>R$ {{ "%.2f"|format(s.quantidade * s.preco_unitario * (1 - s.desconto / 100)) }}</td>
+                        <td>
+                            <a href="/ordens/remover_servico/{{ s.id }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Remover este serviço?')">🗑️</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Card de Peças -->
+    <div class="card shadow mt-4">
+        <div class="card-header bg-dark text-white">
+            <h4 class="mb-0">Adicionar Peça</h4>
+        </div>
+        <div class="card-body">
+            <a href="/ordens/adicionar_peca/{{ ordem.id }}" class="btn btn-outline-success btn-sm mb-2">➕ Adicionar Peça</a>
+            
+            <table class="table table-bordered table-sm">
+                 <thead class="table-secondary">
+                    <tr>
+                        <th>Nome</th>
+                        <th>Qtd</th>
+                        <th>Preço Unitário</th>
+                        <th>Desconto</th>
+                        <th>Total</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pecas %}
+                    <tr>
+                        <td>{{ p.nome_peca }}</td>
+                        <td>{{ p.quantidade }}</td>
+                        <td>R$ {{ "%.2f"|format(p.preco_unitario) }}</td>
+                        <td>{{ "%.2f"|format(p.desconto) }}%</td>
+                        <td>R$ {{ "%.2f"|format(p.quantidade * p.preco_unitario * (1 - p.desconto / 100)) }}</td>
+                        <td>
+                            <a href="/ordens/remover_peca/{{ p.id }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Remover esta peça?')">🗑️</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Card do Total -->
+    <div class="card shadow mt-4">
+        <div class="card-header bg-dark text-white">
+            <h4 class="mb-0">Total</h4>
+        </div>
+        <div class="card-body">
+            <h4 class="text-end">💰 Total da Ordem: <strong>R$ {{ "%.2f"|format(totais.total_geral) }}</strong></h4>
+        </div>
+    </div>
+</div>
+{% endblock %}

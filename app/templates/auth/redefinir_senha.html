@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Redefinir Senha</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .redefinir-container {
+      background-color: #fff;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #0d6efd;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0b5ed7;
+    }
+
+    button:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+
+    .mensagem {
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: bold;
+      color: green;
+    }
+
+    .erro {
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: bold;
+      color: red;
+    }
+
+    .senha-match {
+      color: green;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .senha-mismatch {
+      color: red;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="redefinir-container">
+    <h2>🔑 Redefinir Senha</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="{{ 'mensagem' if category == 'success' else 'erro' }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    
+    {% if mensagem %}
+      <div class="mensagem">{{ mensagem }}</div>
+    {% endif %}
+    {% if erro %}
+      <div class="erro">{{ erro }}</div>
+    {% endif %}
+    
+    <form method="POST">
+      <label for="senha">Nova senha:</label>
+      <input type="password" name="senha" id="senha" required>
+      <div id="feedback" style="font-size:14px; margin-bottom:10px;"></div>
+
+      <label for="confirmar_senha">Confirmar nova senha:</label>
+      <input type="password" name="confirmar_senha" id="confirmar_senha" required>
+      <div id="confirmar-feedback" style="font-size:14px; margin-bottom:15px;"></div>
+
+      <button type="submit" id="submit-btn">Salvar nova senha</button>
+    </form>
+  </div>
+</body>
+<script>
+  const senhaInput = document.getElementById('senha');
+  const confirmarSenhaInput = document.getElementById('confirmar_senha');
+  const feedback = document.getElementById('feedback');
+  const confirmarFeedback = document.getElementById('confirmar-feedback');
+  const submitBtn = document.getElementById('submit-btn');
+
+  function validarSenha(senha) {
+    const requisitos = [
+      { regex: /.{8,}/, texto: "Mínimo de 8 caracteres" },
+      { regex: /[A-Z]/, texto: "Letra maiúscula" },
+      { regex: /[0-9]/, texto: "Número" },
+      { regex: /[^A-Za-z0-9]/, texto: "Caractere especial" }
+    ];
+
+    const faltando = requisitos
+      .filter(r => !r.regex.test(senha))
+      .map(r => r.texto);
+
+    return { valida: faltando.length === 0, faltando };
+  }
+
+  function validarConfirmacaoSenha() {
+    const senha = senhaInput.value;
+    const confirmarSenha = confirmarSenhaInput.value;
+
+    if (confirmarSenha === '') {
+      confirmarFeedback.innerHTML = '';
+      return false;
+    }
+
+    if (senha === confirmarSenha) {
+      confirmarFeedback.innerHTML = "<span class='senha-match'>✅ Senhas coincidem</span>";
+      return true;
+    } else {
+      confirmarFeedback.innerHTML = "<span class='senha-mismatch'>❌ Senhas não coincidem</span>";
+      return false;
+    }
+  }
+
+  function atualizarBotao() {
+    const senhaValida = validarSenha(senhaInput.value).valida;
+    const confirmacaoValida = validarConfirmacaoSenha();
+    
+    submitBtn.disabled = !(senhaValida && confirmacaoValida);
+  }
+
+  senhaInput.addEventListener('input', function() {
+    const senha = senhaInput.value;
+    const validacao = validarSenha(senha);
+
+    if (validacao.valida) {
+      feedback.innerHTML = "<span style='color:green'>✅ Senha forte</span>";
+    } else {
+      feedback.innerHTML = "<span style='color:red'>Faltam: " + validacao.faltando.join(", ") + "</span>";
+    }
+
+    validarConfirmacaoSenha();
+    atualizarBotao();
+  });
+
+  confirmarSenhaInput.addEventListener('input', function() {
+    validarConfirmacaoSenha();
+    atualizarBotao();
+  });
+
+  // Validação inicial
+  atualizarBotao();
+</script>
+</html>

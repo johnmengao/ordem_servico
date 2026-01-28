@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Dashboard{% endblock %}
+
+{% block conteudo %}
+<style>
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.card {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  padding: 20px;
+  width: 180px;
+  text-align: center;
+  transition: transform 0.2s ease;
+  border-left: 5px solid #0d6efd;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card h3 {
+  margin-bottom: 10px;
+  font-size: 1em;
+  color: #0d6efd;
+}
+
+.card p {
+  font-size: 1.6em;
+  font-weight: bold;
+  color: #333;
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 20px;
+  align-items: center;
+}
+
+.filtros form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.admin-acoes {
+  margin-top: 30px;
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.admin-acoes h3 {
+  font-size: 1.1em;
+  margin-bottom: 10px;
+}
+
+.admin-acoes ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.admin-acoes li {
+  margin-bottom: 8px;
+}
+
+.admin-acoes a {
+  text-decoration: none;
+  color: #0d6efd;
+}
+
+.grafico {
+  margin-top: 40px;
+}*/
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="container mt-4">
+  <h2 class="mb-4 text-center">📊 Painel de Controle</h2>
+
+
+  <h5>👋 Bem-vindo, {{ usuario.nome }}!</h5>
+  <p>Tipo de usuário: <strong>{{ usuario.tipo | capitalize }}</strong></p>
+
+  <hr>
+
+  <!-- Cards de resumo -->
+  <section class="cards">
+    <div class="card"><h3>👥 Clientes</h3><p>{{ clientes }}</p></div>
+    <div class="card"><h3>🔧 Peças</h3><p>{{ pecas }}</p></div>
+    <div class="card"><h3>🛠️ Serviços</h3><p>{{ servicos }}</p></div>
+    <div class="card"><h3>📂 Ordens Abertas</h3><p>{{ ordens.aberta or 0 }}</p></div>
+    <div class="card"><h3>✅ Ordens Fechadas</h3><p>{{ ordens.concluida or 0 }}</p></div>
+    <div class="card"><h3>🔧 Aguardando Peça</h3><p>{{ ordens.aguardando_pecas or 0 }}</p></div>
+    {% if usuarios %}
+      <div class="card"><h3>🧑‍💼 Admins</h3><p>{{ usuarios.admin or 0 }}</p></div>
+      <div class="card"><h3>👨‍🔧 Técnicos</h3><p>{{ usuarios.tecnico or 0 }}</p></div>
+    {% endif %}
+  </section>
+
+  {% if usuarios %}
+  <div class="admin-acoes">
+    <h3>🔒 Ações Administrativas</h3>
+    <ul>
+      <li><a href="/usuarios">👥 Gerenciar Usuários</a></li>
+      <li><a href="/usuarios/novo">➕ Adicionar Usuário</a></li>
+      <!--<li><a href="/financeiro/nova">💰 Registrar Movimentação</a></li>-->
+      <li><a href="/financeiro/painel">💰 Painel Financeiro</a></li>
+
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="admin-acoes">
+    <h5 class="mb-3">📷 Alterar Logo da Empresa</h5>
+      <form action="{{ url_for('dashboard.upload_logo') }}" method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+          <input type="file" name="logo" class="form-control" accept="image/*" required>
+        </div>
+        <button type="submit" class="btn btn-primary">💾 Atualizar Logo</button>
+      </form>
+  </div>
+  
+  <hr>
+
+  <!-- Filtro de datas -->
+    <form id="filtroForm" class="row g-3 mb-4">
+      <div class="col-md-4">
+        <label for="de" class="form-label">De:</label>
+        <input type="date" id="de" name="de" class="form-control" value="{{ request.args.get('de', '') }}">
+      </div>
+      <div class="col-md-4">
+        <label for="ate" class="form-label">Até:</label>
+        <input type="date" id="ate" name="ate" class="form-control" value="{{ request.args.get('ate', '') }}">
+      </div>
+      <div class="col-md-4 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+      </div>
+    </form>
+
+  <!-- Gráfico principal -->
+  <div class="row mt-5">
+    <div class="col-md-6">
+      <h5 class="text-center mb-3">📊 Status das Ordens de Serviço</h5>
+      <canvas id="graficoOrdens" height="200"></canvas>
+    </div>
+    <div class="col-md-6">
+      <h5 class="text-center mb-3">💳 Entradas por Forma de Pagamento</h5>
+      <canvas id="graficoDespesas" height="200"></canvas>
+    </div>
+    <div class="row mt-5">
+      <div class="col-md-12">
+        <h5 class="text-center mb-3">📈 Evolução Mensal das Ordens de Serviço</h5>
+        <canvas id="graficoEvolucao" height="120"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+
+    <!-- Outro gráfico opcional (exemplo de expansão futura) -->
+    
+
+  <!-- Período dia, mês e ano -->
+    <div class="row text-center mt-4">
+    <div class="col">
+      <h5>Entradas do Dia</h5>
+      <p>R$ {{ "%.2f"|format(total_dia) }}</p>
+    </div>
+    <div class="col">
+      <h5>Entradas do Mês</h5>
+      <p>R$ {{ "%.2f"|format(total_mes) }}</p>
+    </div>
+    <div class="col">
+      <h5>Entradas do Ano</h5>
+      <p>R$ {{ "%.2f"|format(total_ano) }}</p>
+    </div>
+  </div>
+</div> <!-- fecha container -->
+<script>
+const ctx = document.getElementById('graficoOrdens').getContext('2d');
+new Chart(ctx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Abertas', 'Em Andamento', 'Aguardando Pecas', 'Aguardando Aprovação', 'Concluída', 'Fechadas'],
+    datasets: [{
+      label: 'Ordens de Serviço',
+      data: [{{ ordens.aberta or 0 }}, {{ ordens.em_andamento or 0}}, {{ ordens.aguardando_pecas or 0}}, {{ ordens.aguardando_aprovacao or 0}}, {{ ordens.concluida or 0}}, {{ ordens.fechada or 0 }}],
+      backgroundColor: ['#3498db', '#2ecc71'],
+      borderRadius: 5
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: 'Status das Ordens de Serviço',
+        font: { size: 16 }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { stepSize: 1 }
+      }
+    }
+  }
+});
+
+async function carregarGraficoEvolucao() {
+  const response = await fetch('/dashboard/evolucao');
+  const dados = await response.json();
+
+  const labels = Object.keys(dados);
+  const abertas = labels.map(mes => dados[mes].aberta);
+  const fechadas = labels.map(mes => dados[mes].fechada);
+
+  const ctx = document.getElementById('graficoEvolucao').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Abertas',
+          data: abertas,
+          borderColor: '#f39c12',
+          backgroundColor: 'rgba(243, 156, 18, 0.2)',
+          fill: true,
+          tension: 0.3
+        },
+        {
+          label: 'Fechadas',
+          data: fechadas,
+          borderColor: '#27ae60',
+          backgroundColor: 'rgba(39, 174, 96, 0.2)',
+          fill: true,
+          tension: 0.3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Evolução Mensal das Ordens de Serviço',
+          font: { size: 16 }
+        },
+        legend: {
+          position: 'top'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 }
+        }
+      }
+    }
+  });
+}
+
+carregarGraficoEvolucao();
+
+
+const canvasDespesas = document.getElementById('graficoDespesas');
+if (canvasDespesas) {
+  const ctx = canvasDespesas.getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: {{ labels | tojson }},
+      datasets: [{
+        label: 'Entradas por Forma de Pagamento',
+        data: {{ valores | tojson }},
+        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Entradas por Forma de Pagamento'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
+
+</script>
+{% endblock %}

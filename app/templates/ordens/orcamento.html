@@ -1,0 +1,63 @@
+
+<body onload="window.print()">
+<div class="container mt-4">
+  <h2>Ordem de Serviço #{{ ordem.id }}</h2>
+<p><strong>Cliente:</strong> {{ cliente.nome }}</p>
+</p>
+<!--<p><strong>Prioridade:</strong> {{ ordem.prioridade }}</p>-->
+<p><strong>Data de abertura:</strong> {{ ordem.data_abertura }}</p>
+<p><strong>Descrição de entrada:</strong> {{ ordem.descricao_entrada }}</p>
+<p><strong>Descrição do Orçamento:</strong> {{ ordem.descricao_saida or '—' }}</p>
+<p><strong>Observações:</strong> {{ ordem.observacoes or '—' }}</p>
+
+<hr>
+<h3>Serviços</h3>
+<table class="table table-bordered table-sm">
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>Qtd</th>
+      <th>Preço Unitário</th>
+      <th>Desconto</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in servicos %}
+    <tr>
+      <td>{{ s.nome }}</td>
+      <td>{{ s.quantidade }}</td>
+      <td>R$ {{ "%.2f"|format(s.preco_unitario) }}</td>
+      <td>{{ "%.2f"|format(s.desconto) }}%</td>
+      <td>R$ {{ "%.2f"|format(s.quantidade * s.preco_unitario * (1 - s.desconto / 100)) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<hr>
+<h3>Peças</h3>
+<table>
+  <tr>
+    <th>Nome</th>
+    <th>Qtd</th>
+    <th>Preço</th>
+    <th>Desconto</th>
+    <th>Total</th>
+  </tr>
+  {% for p in pecas %}
+  <tr>
+    <td>{{ p.nome }}</td>
+    <td>{{ p.quantidade }}</td>
+    <td>R$ {{ "%.2f"|format(p.preco_unitario) }}</td>
+    <td>{{ "%.2f"|format(p.desconto) }}%</td>
+    <td>R$ {{ "%.2f"|format(p.quantidade * p.preco_unitario * (1 - p.desconto / 100)) }}</td>
+  </tr>
+  {% endfor %}
+</table>
+<hr>
+
+<h3>Totais</h3>
+<p><strong>Total de serviços:</strong> R$ {{ "%.2f"|format(totais.total_servicos) }}</p>
+<p><strong>Total de peças:</strong> R$ {{ "%.2f"|format(totais.total_pecas) }}</p>
+<p><strong>Total geral:</strong> <span class="fw-bold">R$ {{ "%.2f"|format(totais.total_geral) }}</span></p>

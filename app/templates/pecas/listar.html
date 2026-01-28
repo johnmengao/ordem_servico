@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block conteudo %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>🔧 Peças</h2>
+  <a href="/pecas/nova" class="btn btn-success">➕ Nova Peça</a>
+</div>
+<div class="container mt-4">
+  <table class="table table-striped table-hover table-responsive">
+    <thead class="table-dark">
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Preço (R$)</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for peca in pecas %}
+      <tr>
+        <td>{{ peca.id }}</td>
+        <td>{{ peca.nome }}</td>
+        <td>{{ "%.2f"|format(peca.preco_padrao) }}</td>
+        <td>
+          <a href="/pecas/editar/{{ peca.id }}" class="btn btn-sm btn-outline-warning"title="Editar">✏️Editar</a>
+          <form action="/pecas/excluir/{{ peca.id }}" method="post" onsubmit="return confirm('Tem certeza que deseja excluir esta peça?')" style="display:inline;">
+            <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Excluir</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <!-- Paginação -->
+  <nav aria-label="Navegação de páginas">
+    <ul class="pagination justify-content-center">
+      {% for p in range(1, total_paginas + 1) %}
+        <li class="page-item {% if p == pagina %}active{% endif %}">
+          <a class="page-link" href="?pagina={{ p }}">{{ p }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </nav>
+
+</div>
+</div>
+{% endblock %}

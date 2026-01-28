@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<div class="container mt-4">
+    <!-- Cabeçalho -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">📋 Ordem de Serviço #{{ ordem.id }}</h4>
+            <span class="badge bg-{{ 'success' if ordem.status == 'concluida' else 'warning' if ordem.status == 'em_andamento' else 'info' }} fs-6">
+                {{ ordem.status.replace('_', ' ') | title if ordem.status else 'Não definido' }}
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Informações do Cliente -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <h6 class="text-primary mb-1">👤 Cliente</h6>
+                        <p class="fs-5 fw-bold">{{ cliente.nome }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-primary mb-1">📝 Título</h6>
+                        <p class="fs-6">{{ ordem.titulo }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-primary mb-1">🚨 Prioridade</h6>
+                        <span class="badge bg-{{ 'danger' if ordem.prioridade == 'urgente' else 'warning' if ordem.prioridade == 'alta' else 'info' }}">
+                            {{ ordem.prioridade | capitalize }}
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Informações da Ordem -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <h6 class="text-primary mb-1">📅 Data de Abertura</h6>
+                        <p class="fs-6">{{ ordem.data_abertura.strftime('%d/%m/%Y %H:%M') if ordem.data_abertura else '—' }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-primary mb-1">🔒 Data de Fechamento</h6>
+                        <p class="fs-6">{{ ordem.data_fechamento.strftime('%d/%m/%Y %H:%M') if ordem.data_fechamento else '—' }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Descrições -->
+            <div class="row mt-3">
+                <div class="col-12 mb-3">
+                    <h6 class="text-primary mb-2">📥 Descrição de Entrada</h6>
+                    <div class="border rounded p-3 bg-light">
+                        {{ ordem.descricao_entrada or '—' }}
+                    </div>
+                </div>
+                
+                <div class="col-12 mb-3">
+                    <h6 class="text-primary mb-2">📤 Descrição de Saída</h6>
+                    <div class="border rounded p-3 bg-light">
+                        {{ ordem.descricao_saida or '—' }}
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <h6 class="text-primary mb-2">📝 Observações</h6>
+                    <div class="border rounded p-3 bg-light">
+                        {{ ordem.observacoes or '—' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Serviços -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">🛠️ Serviços Realizados</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th>Serviço</th>
+                            <th class="text-center">Quantidade</th>
+                            <th class="text-end">Preço Unitário</th>
+                            <th class="text-center">Desconto</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in servicos %}
+                        <tr>
+                            <td class="fw-bold">{{ s.nome_servico }}</td>
+                            <td class="text-center">{{ s.quantidade }}</td>
+                            <td class="text-end">R$ {{ "%.2f"|format(s.preco_unitario) }}</td>
+                            <td class="text-center">{{ "%.2f"|format(s.desconto) }}%</td>
+                            <td class="text-end fw-bold text-success">
+                                R$ {{ "%.2f"|format(s.quantidade * s.preco_unitario * (1 - s.desconto / 100)) }}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-3">
+                                <i class="bi bi-info-circle"></i> Nenhum serviço registrado
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Peças -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">🔩 Peças Utilizadas</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th>Peça</th>
+                            <th class="text-center">Quantidade</th>
+                            <th class="text-end">Preço Unitário</th>
+                            <th class="text-center">Desconto</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in pecas %}
+                        <tr>
+                            <td class="fw-bold">{{ p.nome_peca }}</td>
+                            <td class="text-center">{{ p.quantidade }}</td>
+                            <td class="text-end">R$ {{ "%.2f"|format(p.preco_unitario) }}</td>
+                            <td class="text-center">{{ "%.2f"|format(p.desconto) }}%</td>
+                            <td class="text-end fw-bold text-success">
+                                R$ {{ "%.2f"|format(p.quantidade * p.preco_unitario * (1 - p.desconto / 100)) }}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-3">
+                                <i class="bi bi-info-circle"></i> Nenhuma peça registrada
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Totais -->
+    <div class="card shadow border-dark">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">💰 Resumo Financeiro</h5>
+        </div>
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-muted">Total de Serviços</h6>
+                    <h4 class="text-success">R$ {{ "%.2f"|format(totais.total_servicos) }}</h4>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-muted">Total de Peças</h6>
+                    <h4 class="text-info">R$ {{ "%.2f"|format(totais.total_pecas) }}</h4>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h6 class="text-muted">Total Geral</h6>
+                    <h3 class="text-primary fw-bold">R$ {{ "%.2f"|format(totais.total_geral) }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botões de Ação -->
+    {% if ordem.status != 'concluida' and ordem.status != 'finalizada' %}
+    <div class="card shadow mt-4">
+        <div class="card-body text-center">
+            <div class="btn-group" role="group">
+                <a href="/ordens/editar/{{ ordem.id }}" class="btn btn-warning">
+                    <i class="bi bi-pencil"></i> ✏️ Editar Ordem
+                </a>
+                <form action="/ordens/finalizar/{{ ordem.id }}" method="post" class="d-inline">
+                    <!-- Botão Finalizar com ícone -->
+                    <button type="button" class="btn btn-success" title="Finalizar" data-bs-toggle="modal" data-bs-target="#modalFinalizar{{ ordem.id }}">
+                      <i class="bi bi-pencil"></i> ✅ Finalizar Ordem
+                    </button>
+                </form>
+                <a href="/ordens/relatorio_pdf/{{ ordem.id }}" class="btn btn-primary ms-2">
+                    <i class="bi bi-printer"></i> 🖨️ Imprimir Orçamento
+                </a>
+            </div>
+        </div>
+    </div>
+     <!-- Modal de finalização -->
+        <div class="modal fade" id="modalFinalizar{{ ordem.id }}" tabindex="-1" aria-labelledby="modalLabel{{ ordem.id }}" aria-hidden="true">
+          <div class="modal-dialog">
+            <form action="/ordens/finalizar/{{ ordem.id }}" method="POST">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="modalLabel{{ ordem.id }}">Finalizar Ordem #{{ ordem.id }}</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                  <label for="metodo_pagamento_id">Método de Pagamento:</label>
+                  <select name="metodo_pagamento_id" class="form-select" required>
+                    <option value="">Selecione</option>
+                    <option value="1">Dinheiro</option>
+                    <option value="2">Cartão de Crédito</option>
+                    <option value="3">Cartão de Débito</option>
+                    <option value="4">Pix</option>
+                    <option value="5">Transferência</option>
+                    <option value="6">Boletos</option>
+                  </select>
+                </div>
+                <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary">Confirmar</button>
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+    {% else %}
+    <div class="card shadow mt-4">
+        <div class="card-body text-center">
+            <a href="/ordens/relatorio_pdf/{{ ordem.id }}" class="btn btn-primary">
+                <i class="bi bi-printer"></i> 🖨️ Imprimir Orçamento
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.card {
+    border: none;
+    border-radius: 10px;
+}
+.table th {
+    border-top: none;
+    font-weight: 600;
+}
+.badge {
+    font-size: 0.8em;
+    padding: 6px 10px;
+    border-radius: 15px;
+}
+.btn {
+    border-radius: 8px;
+}
+</style>
+{% endblock %}

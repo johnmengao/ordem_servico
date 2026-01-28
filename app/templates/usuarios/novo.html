@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block conteudo %}
+<div class="container mt-4">
+  <div class="card shadow">
+    <div class="card-header bg-dark text-white">
+      <h4 class="mb-0">Cadastro de Novo Usuário</h4>
+    </div>
+    <div class="card-body">
+      <form method="POST">
+        <div class="mb-3">
+          <label for="nome" class="form-label">Nome:</label>
+          <input type="text" class="form-control" id="nome" name="nome" required>
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email:</label>
+          <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <div class="mb-3">
+          <label for="senha" class="form-label">Senha:</label>
+          <input type="password" class="form-control" id="senha" name="senha" required>
+          <div id="feedback" class="form-text text-danger mt-1"></div>
+        </div>
+        <div class="mb-3">
+          <label for="tipo" class="form-label">Tipo de Usuário:</label>
+          <select class="form-select" id="tipo" name="tipo" required>
+            <option value="admin">Admin</option>
+            <option value="tecnico">Técnico</option>
+          </select>
+        </div>
+        <div class="text-end">
+          <button type="submit" class="btn btn-success">💾 Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const senhaInput = document.getElementById('senha');
+  const feedback = document.getElementById('feedback');
+
+  senhaInput.addEventListener('input', function () {
+    const senha = senhaInput.value;
+
+    const requisitos = [
+      { regex: /.{8,}/, texto: "Mínimo de 8 caracteres" },
+      { regex: /[A-Z]/, texto: "Letra maiúscula" },
+      { regex: /[0-9]/, texto: "Número" },
+      { regex: /[^A-Za-z0-9]/, texto: "Caractere especial" }
+    ];
+
+    const faltando = requisitos
+      .filter(r => !r.regex.test(senha))
+      .map(r => r.texto);
+
+    if (faltando.length === 0) {
+      feedback.innerHTML = "<span class='text-success'>Senha forte ✅</span>";
+    } else {
+      feedback.innerHTML = "<span class='text-danger'>Faltam: " + faltando.join(", ") + "</span>";
+    }
+  });
+</script>
+{% endblock %}
