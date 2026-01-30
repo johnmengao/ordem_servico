@@ -55,6 +55,21 @@ class Usuario:
             """, (nome, email, tipo, ativo, id))
         db.commit()
 
+    @staticmethod
+    def atualizar_senha(db, id, nova_senha):
+        """
+        Atualiza apenas a senha de um usuário específico.
+        """
+        senha_hash = generate_password_hash(nova_senha)
+        cursor = db.cursor()
+        cursor.execute("""
+            UPDATE usuario
+            SET senha = %s
+            WHERE id = %s
+        """, (senha_hash, id))
+        db.commit()
+        cursor.close()
+
 
     @staticmethod
     def excluir(db, id):

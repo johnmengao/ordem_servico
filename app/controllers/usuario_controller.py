@@ -1,5 +1,4 @@
-from flask import Blueprint
-from flask import render_template, request, redirect, current_app
+from flask import Blueprint, render_template, request, redirect, current_app, flash, url_for
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models.usuario import Usuario
@@ -96,6 +95,26 @@ def editar_usuario(id):
         return redirect('/usuarios')
 
     return render_template('usuarios/editar.html', usuario=usuario)
+
+@usuario_bp.route('/usuarios/reset_senha/<int:id>', methods=['POST'])
+@login_required
+def reset_senha(id):
+    if current_user.tipo != 'admin':
+        return redirect('/dashboard')
+
+    db = current_app.config['db']
+    nova_senha = request.form['nova_senha']
+    confirmar_senha = request.form['confirmar_senha']
+
+    if nova_senha != confirmar_senha:
+        flash("As senhas não coincidem. Tente novamente.", "danger")
+        return redirect(url_for('usuario.editar_usuario', id=id))
+
+    Usuario.atualizar_senha(db, id, nova_senha)
+    flash("Senha redefinida com sucesso!", "success")
+    return redirect(url_for('usuario.editar_usuario', id=id))
+
+
 
 @usuario_bp.route('/usuarios/excluir/<int:id>', methods=['POST'])
 @login_required
